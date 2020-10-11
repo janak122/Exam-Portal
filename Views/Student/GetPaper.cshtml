@@ -1,0 +1,27 @@
+﻿@model MCQPaperDTO
+@{
+    ViewData["Title"] = "GetPaper";
+}
+
+<h1>Qustion Paper</h1>
+
+<form asp-action="SubmitPaper">
+    @for (var i = 0; i < Model.Questions.Count(); i++)
+    {
+        <div class="card my-1">
+            <div class="card-header">@Model.Questions[i].QuestionText</div>
+            <input type="hidden" asp-for="@Model.Questions[i].QuestionText" />
+
+            <div class="card-body">
+                @for (var j = 0; j < Model.Questions[i].Opetions.Count(); j++)
+                {
+                    <input type="radio" value="@j" asp-for="@Model.Questions[i].Selected" />
+                    <label>@Model.Questions[i].Opetions[j]</label>
+                    <input type="hidden" asp-for="@Model.Questions[i].Opetions[j]" />
+                }
+            </div>
+        </div>
+    }
+    <input type="submit" class="btn btn-success" value="submit" />
+</form>
+

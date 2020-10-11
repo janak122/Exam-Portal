@@ -1,0 +1,45 @@
+﻿@model MCQPaperDTO
+@{
+    ViewData["Title"] = "MakePaper";
+}
+
+<h1>Make Paper</h1>
+<hr />
+
+<form asp-action="MakePaper">
+    <button type="button" id="AddQuestion" class="btn btn-info">
+        <i class="fas fa-1x fa-plus"></i>&nbsp;Add Question
+    </button>
+    <div class="my-5" id="questionContainer">
+
+    </div>
+    <input type="submit" value="submit" class="btn btn-success" />
+</form>
+
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var question = `<div class="card my-1 removeQue">
+<div class="card-header">
+<div class="input-group">
+<input type="text" class="form-control" placeholder="write Question here!">
+<div class="input-group-append" style="background:red">
+<span class="input-group-text removeMe" style="cursor:pointer;"><i class="fas fa-1x fa-times"></i></span>
+</div>
+</div>
+<div class="card-body">
+
+</div>
+</div>`;
+            $("#AddQuestion").click(function () {
+                var newQue = $(question);
+                $("#questionContainer").append(newQue);
+            });
+            $("#questionContainer").on("click", "span.removeMe", function () {
+                $(this).parent().closest(".removeQue").remove();
+            });
+        });
+    </script>
+}
+
