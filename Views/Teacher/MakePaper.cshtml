@@ -2,11 +2,13 @@
 @{
     ViewData["Title"] = "MakePaper";
 }
-
+@section Styles{
+    <link href="~/css/form.css" rel="stylesheet" />
+}
 <h1>Make Paper</h1>
 <hr />
 
-<form asp-action="MakePaper">
+<form asp-action="MakePaper" id="MakePaper">
     <button type="button" id="AddQuestion" class="btn btn-info">
         <i class="fas fa-1x fa-plus"></i>&nbsp;Add Question
     </button>
@@ -20,24 +22,64 @@
 @section Scripts{
     <script>
         $(document).ready(function () {
-            var question = `<div class="card my-1 removeQue">
+            var question = `<div class="card my-1 Question">
 <div class="card-header">
 <div class="input-group">
+<div class="input-group-prepend">
+<span class="input-group-text addOption input-group-addon primary" style="cursor:pointer;"><i class="fas fa-1x fa-plus"></i>&nbsp Add Options</span>
+</div>
 <input type="text" class="form-control" placeholder="write Question here!">
-<div class="input-group-append" style="background:red">
-<span class="input-group-text removeMe" style="cursor:pointer;"><i class="fas fa-1x fa-times"></i></span>
+<div class="input-group-append">
+<span class="input-group-text removeQue input-group-addon danger" style="cursor:pointer;"><i class="fas fa-1x fa-times"></i></span>
 </div>
 </div>
 <div class="card-body">
 
 </div>
 </div>`;
+            var option = `
+<div class="input-group my-1">
+<input type="text" class="form-control">
+<div class="input-group-append">
+<span class="input-group-text removeOpt input-group-addon danger" style="cursor:pointer;"><i class="fas fa-1x fa-times"></i></span>
+</div>
+</div>
+`;
             $("#AddQuestion").click(function () {
                 var newQue = $(question);
                 $("#questionContainer").append(newQue);
             });
-            $("#questionContainer").on("click", "span.removeMe", function () {
-                $(this).parent().closest(".removeQue").remove();
+            $("#questionContainer").on("click", "span.removeQue", function () {
+                $(this).parent().closest(".Question").remove();
+            });
+            $("#questionContainer").on("click", "span.removeOpt", function () {
+                var optContainer = $(this).parent().closest(".card-body");
+                $(this).parent().closest(".input-group").remove();
+                var i = 1;
+                optContainer.find("input").each(function () {
+                    $(this).attr("placeholder", "Option " + i);
+                    i++;
+                });
+            });
+            $("#questionContainer").on("click", "span.addOption", function () {
+                var optContainer = $(this).parent().closest(".Question").find(".card-body");
+                var newOpt = $(option);
+                newOpt.find("input").attr("placeholder", `Option ${optContainer.children().length + 1}`);
+                optContainer.append(newOpt);
+            });
+            $("#MakePaper").submit(function () {
+                var i = 0;
+                $("#questionContainer").find(".Question").each(function () {
+                    //$(this).find(".card-header input").attr("id", "Questions_" + i + "__QuestionText");
+                    $(this).find(".card-header input").attr("name", `Questions[${i}].QuestionText`);
+                    var j = 0;
+                    $(this).find(".card-body input").each(function () {
+                        //$(this).attr("id", "Questions_" + i + "__Opetions_" + j);
+                        $(this).attr("name", `Questions[${i}].Opetions[${j}]`);
+                        j++;
+                    });
+                    i++;
+                });
             });
         });
     </script>

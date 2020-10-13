@@ -2,9 +2,27 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="jumbotron my-5">
+    <div class="text-center">
+        <h1 class="display-4">Welcome To Exam Portal</h1>
+    </div>
+    <nav class="navbar navbar-expand-lg">
+        <div class="navbar-nav mx-auto">
+            <div class="btn-group m-2">
+                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Make Paper
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Make MCQ Paper</a>
+                    <a class="dropdown-item" href="#">Make Discriptive Paper</a>
+                </div>
+            </div>
+            <a class="nav-item btn btn-info m-2" href="#">My Paper List</a>
+            <a class="nav-item btn btn-info m-2" href="#">My Answer List</a>
+            <a class="nav-item btn btn-info m-2" href="#">Write Answer</a>
+        </div>
+    </nav>
 </div>
 <p>
     @ViewBag.Data
