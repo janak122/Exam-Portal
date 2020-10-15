@@ -7,13 +7,10 @@ namespace ExamPortal.Models
 {
     public class MCQPaper : Paper
     {
+        public MCQPaper()
+        {
+            Questions = new List<MCQQuestion>();
+        }
         public ICollection<MCQQuestion> Questions { get; set; }
-    }
-
-    public interface IMCQPaperRepo
-    {
-        public MCQPaper GetPaper(string paperCode);
-        public IEnumerable<MCQPaper> GetPapersByAuthor(string email);
-
     }
 }

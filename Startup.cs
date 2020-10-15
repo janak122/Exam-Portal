@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using AutoMapper;
 namespace ExamPortal
 {
     public class Startup
@@ -36,18 +36,8 @@ namespace ExamPortal
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
             });
-            services.AddAuthentication().AddGoogle(options =>
-            {
-                options.ClientId = "429011546677-b4aqo982bjmj49422n4lk796lrbq1rt9.apps.googleusercontent.com";
-                options.ClientSecret = "CPywROTlE_Hrj-z77ynSdaQS";
-            });
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
-            {
-                options.Password.RequiredLength = 10;
-                options.Password.RequiredUniqueChars = 3;
-                options.Password.RequireNonAlphanumeric = false;
-            })
-               .AddEntityFrameworkStores<AppDbContext>();
+            services.configureAuth();
+
             services.AddDbContextPool<AppDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MyFirstDbConnection")));
             services.configureDI();

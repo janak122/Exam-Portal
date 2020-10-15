@@ -8,6 +8,12 @@ namespace ExamPortal.Models
 {
     public class MCQQuestion : Question
     {
+        public MCQQuestion()
+        {
+            MCQOptions = new List<MCQOption>();
+            MCQPaper = new MCQPaper();
+            TrueAnswer = new MCQOption();
+        }
         public int MCQPaperId { get; set; }
         public MCQPaper MCQPaper { get; set; }
 
@@ -17,9 +23,5 @@ namespace ExamPortal.Models
 
         public ICollection<MCQOption> MCQOptions { get; set; }
     }
-    public class MCQOption
-    {
-        public int Id { get; set; }
-        public string OptionText { get; set; }
-    }
+
 }

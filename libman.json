@@ -7,8 +7,12 @@
       "destination": "wwwroot/lib/font-awesome/"
     },
     {
-      "library": "bootstrap-datepicker@1.9.0",
-      "destination": "wwwroot/lib/bootstrap-datepicker/"
+      "library": "bootstrap-datetimepicker@4.17.47",
+      "destination": "wwwroot/lib/bootstrap-datetimepicker/"
+    },
+    {
+      "library": "moment.js@2.29.1",
+      "destination": "wwwroot/lib/"
     }
   ]
 }

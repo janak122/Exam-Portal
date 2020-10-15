@@ -5,66 +5,17 @@ using System.Threading.Tasks;
 
 namespace ExamPortal.DTOS
 {
-
-    public class MCQPaperDTO
+    public class PaperDTO
     {
-        public MCQPaperDTO()
+        public PaperDTO()
         {
-            ExpTime = DateTime.Today.AddDays(2);
-            Questions = new List<MCQQuestionDTO>();
+            CreatedDate = DateTime.Now;
+            DeadLine = DateTime.Now.AddDays(2);
         }
-        public DateTime ExpTime { get; set; }
-        public List<MCQQuestionDTO> Questions { get; set; }
-
+        public string PaperCode { get; set; }
+        public string TeacherEmailId { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime DeadLine { get; set; }
+        public string PaperTitle { get; set; }
     }
-    public class MCQQuestionDTO
-    {
-        public string QuestionText { get; set; }
-        public List<string> Opetions { get; set; }
-        public int Selected { get; set; }
-    }
-    //public class ListItemDTO
-    //{
-    //    public string Text { get; set; }
-    //    public int Value { get; set; }
-    //    public bool Selected { get; set; }
-    //}
-    //public enum AnswerType
-    //{
-    //    Radio = 0, Text = 1, CheckBox = 2
-    //}
-    //public enum PaperType
-    //{
-    //    MCQS = 0, Discriptive = 1
-    //}
-    //public class PaperDTO
-    //{
-    //    public PaperDTO()
-    //    {
-    //        PaperType = PaperType.MCQS;
-    //        Questions = new List<QuestionDTO>();
-    //        ExpTime = DateTime.Today.AddDays(2);
-    //    }
-    //    public PaperType PaperType { get; set; }
-    //    public DateTime ExpTime { get; set; }
-    //    public List<QuestionDTO> Questions { get; set; }
-
-    //}
-
-
-
-    //public class QuestionDTO
-    //{
-    //    public QuestionDTO()
-    //    {
-    //        AnswerType = AnswerType.Text;
-    //        Opetions = new List<ListItemDTO>();
-    //        QuestionText = "";
-    //    }
-    //    public string QuestionText { get; set; }
-    //    public AnswerType AnswerType { get; set; }
-    //    public List<ListItemDTO> Opetions { get; set; }
-    //}
-
-
 }

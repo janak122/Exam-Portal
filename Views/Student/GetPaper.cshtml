@@ -15,7 +15,7 @@
             <div class="card-body">
                 @for (var j = 0; j < Model.Questions[i].Opetions.Count(); j++)
                 {
-                    <input type="radio" value="@j" asp-for="@Model.Questions[i].Selected" />
+                    <input type="radio" value="@j" asp-for="@Model.Questions[i].TrueAnswer" />
                     <label>@Model.Questions[i].Opetions[j]</label>
                     <input type="hidden" asp-for="@Model.Questions[i].Opetions[j]" />
                 }

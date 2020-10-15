@@ -11,7 +11,5 @@ namespace ExamPortal.Models
         public string StudentEmailId { get; set; }
         public DateTime SubmittedTime { get; set; }
 
-        public int MCQPaperId { get; set; }
-        public MCQPaper MCQPaper { get; set; }
     }
 }
