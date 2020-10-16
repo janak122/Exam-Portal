@@ -30,9 +30,6 @@ namespace ExamPortal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MCQPaperId")
-                        .HasColumnType("int");
-
                     b.Property<string>("StudentEmailId")
                         .HasColumnType("nvarchar(max)");
 
@@ -40,8 +37,6 @@ namespace ExamPortal.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MCQPaperId");
 
                     b.ToTable("AnswerSheets");
 
@@ -55,7 +50,7 @@ namespace ExamPortal.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("MCQQuestionId")
+                    b.Property<int>("MCQQuestionId")
                         .HasColumnType("int");
 
                     b.Property<string>("OptionText")
@@ -325,8 +320,13 @@ namespace ExamPortal.Migrations
                 {
                     b.HasBaseType("ExamPortal.Models.AnswerSheet");
 
+                    b.Property<int>("MCQPaperId")
+                        .HasColumnType("int");
+
                     b.Property<int>("MarksObtained")
                         .HasColumnType("int");
+
+                    b.HasIndex("MCQPaperId");
 
                     b.HasDiscriminator().HasValue("MCQAnswerSheet");
                 });
@@ -342,7 +342,7 @@ namespace ExamPortal.Migrations
                 {
                     b.HasBaseType("ExamPortal.Models.Question");
 
-                    b.Property<int>("MCQOptionId")
+                    b.Property<int?>("MCQOptionId")
                         .HasColumnType("int");
 
                     b.Property<int>("MCQPaperId")
@@ -355,20 +355,13 @@ namespace ExamPortal.Migrations
                     b.HasDiscriminator().HasValue("MCQQuestion");
                 });
 
-            modelBuilder.Entity("ExamPortal.Models.AnswerSheet", b =>
-                {
-                    b.HasOne("ExamPortal.Models.MCQPaper", "MCQPaper")
-                        .WithMany()
-                        .HasForeignKey("MCQPaperId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ExamPortal.Models.MCQOption", b =>
                 {
-                    b.HasOne("ExamPortal.Models.MCQQuestion", null)
+                    b.HasOne("ExamPortal.Models.MCQQuestion", "MCQQuestion")
                         .WithMany("MCQOptions")
-                        .HasForeignKey("MCQQuestionId");
+                        .HasForeignKey("MCQQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -422,13 +415,20 @@ namespace ExamPortal.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ExamPortal.Models.MCQAnswerSheet", b =>
+                {
+                    b.HasOne("ExamPortal.Models.MCQPaper", "MCQPaper")
+                        .WithMany()
+                        .HasForeignKey("MCQPaperId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ExamPortal.Models.MCQQuestion", b =>
                 {
                     b.HasOne("ExamPortal.Models.MCQOption", "TrueAnswer")
                         .WithMany()
-                        .HasForeignKey("MCQOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MCQOptionId");
 
                     b.HasOne("ExamPortal.Models.MCQPaper", "MCQPaper")
                         .WithMany("Questions")

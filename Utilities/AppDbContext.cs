@@ -23,6 +23,10 @@ namespace ExamPortal.Utilities
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<MCQOption>()
+                .HasOne(x => x.MCQQuestion)
+                .WithMany(x => x.MCQOptions)
+                .HasForeignKey(x => x.MCQQuestionId);
         }
     }
 }

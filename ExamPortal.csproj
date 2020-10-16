@@ -9,6 +9,8 @@
     <Compile Remove="Migrations\20201014154356_demo.Designer.cs" />
     <Compile Remove="Migrations\20201014154751_demo.cs" />
     <Compile Remove="Migrations\20201014154751_demo.Designer.cs" />
+    <Compile Remove="Migrations\20201016064541_McqOptionsUpdated.cs" />
+    <Compile Remove="Migrations\20201016064541_McqOptionsUpdated.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

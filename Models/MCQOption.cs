@@ -9,5 +9,7 @@ namespace ExamPortal.Models
     {
         public int Id { get; set; }
         public string OptionText { get; set; }
+        public int MCQQuestionId { get; set; }
+        public MCQQuestion MCQQuestion { get; set; }
     }
 }

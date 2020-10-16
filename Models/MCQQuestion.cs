@@ -17,7 +17,7 @@ namespace ExamPortal.Models
         public int MCQPaperId { get; set; }
         public MCQPaper MCQPaper { get; set; }
 
-        public int MCQOptionId { get; set; }
+        public int? MCQOptionId { get; set; }
         [ForeignKey("MCQOptionId")]
         public MCQOption TrueAnswer { get; set; }
 

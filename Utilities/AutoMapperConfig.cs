@@ -19,7 +19,8 @@ namespace ExamPortal.Utilities
                 .ForMember(RDest => RDest.Id, LSrc => LSrc.Ignore());
             CreateMap<MCQPaperDTO, MCQPaper>()
                 .ForMember(RDest => RDest.Questions, LSrc => LSrc.Ignore());
-
+            CreateMap<MCQPaper, MCQPaperDTO>()
+                .ForMember(RDest => RDest.Questions, LSrc => LSrc.Ignore());
             CreateMap<QuestionDTO, Question>()
                 .ForMember(RDest => RDest.Id, LSrc => LSrc.Ignore());
             CreateMap<MCQQuestionDTO, MCQQuestion>()
