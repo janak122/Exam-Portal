@@ -9,7 +9,12 @@
 @for (var i = 0; i < Model.Questions.Count(); i++)
 {
     <div class="card my-1">
-        <div class="card-header">@Model.Questions[i].QuestionText</div>
+        <div class="card-header">
+            @Model.Questions[i].QuestionText
+            <span class="badge badge-info float-right">
+                Marks : @Model.Questions[i].Marks
+            </span>
+        </div>
         <input type="hidden" asp-for="@Model.Questions[i].QuestionText" />
 
         <div class="card-body">

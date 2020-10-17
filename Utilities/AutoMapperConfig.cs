@@ -32,7 +32,9 @@ namespace ExamPortal.Utilities
             CreateMap<string, MCQOption>()
                 .ForMember(RDest => RDest.OptionText, LSrc => LSrc.MapFrom(src => src))
                 .ForMember(RDest => RDest.Id, LSrc => LSrc.Ignore());
-
+            CreateMap<MCQAnswerSheet, MCQAnswerSheetDTO>()
+                .ForMember(RDest => RDest.MCQPaper, LSrc => LSrc.MapFrom(src => src.MCQPaper))
+                .ForMember(RDest => RDest.TotalMarks, LSrc => LSrc.Ignore());
         }
 
     }
