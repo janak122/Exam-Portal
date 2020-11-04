@@ -24,21 +24,26 @@ namespace ExamPortal.Services
         public List<MCQPaperDTO> getPapersByEmailId(string emailId);
         public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string Name);
         public MCQAnswerSheet GetMCQAnswerSheetByCodeAndEmail(string paperCode, string Name);
+        public Task<string> CreateDescriptivePaper(DescriptivePaperDTO DesPaper);
     }
 
     public class TeacherServiceImpl : ITeacherService
     {
         public TeacherServiceImpl(IMapper mapper, IMCQPaperRepo paperRepo
-            , IMCQAnswerSheetRepo answerSheetRepo)
+            , IMCQAnswerSheetRepo answerSheetRepo, IFirebaseUpload fire,IDescriptivePaperRepo descriptivePaperRepo)
         {
             Mapper = mapper;
             PaperRepo = paperRepo;
             AnswerSheetRepo = answerSheetRepo;
+            Fire = fire;
+            DescriptivePaperRepo = descriptivePaperRepo;
         }
 
         public IMapper Mapper { get; }
         public IMCQPaperRepo PaperRepo { get; }
         public IMCQAnswerSheetRepo AnswerSheetRepo { get; }
+        public IFirebaseUpload Fire { get; }
+        public IDescriptivePaperRepo DescriptivePaperRepo { get; }
 
         public string CreatePaper(MCQPaperDTO paper)
         {
@@ -94,6 +99,23 @@ namespace ExamPortal.Services
 
             KeyValuePair<int, int> ret = new KeyValuePair<int, int>(TotalMarks, ObtainedMarks);
             return ret;
+        }
+
+        public async Task<string> CreateDescriptivePaper(DescriptivePaperDTO DesPaper)
+        {
+            string code = CodeGenerator.GetSharableCode(); ;
+            DesPaper.PaperCode = code;
+            string linkwith = await Fire.Upload(DesPaper), link = "";
+
+            for (int i = 0; i < linkwith.Length; i++)   //Sql Database Cannot Store Special Character like '&' , So  storing '&' == "EPF"
+            {
+                link += (linkwith[i] == '&') ? Fire.Ampersand : $"{linkwith[i]}";
+            }
+            DescriptivePaper paper = Mapper.Map<DescriptivePaperDTO, DescriptivePaper>(DesPaper);
+            paper.Link = link;
+            DescriptivePaperRepo.Create(paper);
+
+            return code;
         }
     }
 }

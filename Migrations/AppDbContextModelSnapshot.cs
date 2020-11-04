@@ -15,7 +15,7 @@ namespace ExamPortal.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.8")
+                .HasAnnotation("ProductVersion", "3.1.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -329,6 +329,16 @@ namespace ExamPortal.Migrations
                     b.HasIndex("MCQPaperId");
 
                     b.HasDiscriminator().HasValue("MCQAnswerSheet");
+                });
+
+            modelBuilder.Entity("ExamPortal.Models.DescriptivePaper", b =>
+                {
+                    b.HasBaseType("ExamPortal.Models.Paper");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("DescriptivePaper");
                 });
 
             modelBuilder.Entity("ExamPortal.Models.MCQPaper", b =>

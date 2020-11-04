@@ -35,6 +35,8 @@ namespace ExamPortal.Utilities
             CreateMap<MCQAnswerSheet, MCQAnswerSheetDTO>()
                 .ForMember(RDest => RDest.MCQPaper, LSrc => LSrc.MapFrom(src => src.MCQPaper))
                 .ForMember(RDest => RDest.TotalMarks, LSrc => LSrc.Ignore());
+            CreateMap<DescriptivePaperDTO, DescriptivePaper>()
+              .ForMember(RDest => RDest.Link, LSrc => LSrc.Ignore());
         }
 
     }
