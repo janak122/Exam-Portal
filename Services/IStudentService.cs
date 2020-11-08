@@ -5,31 +5,41 @@ using ExamPortal.Repositories;
 using ExamPortal.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ExamPortal.Services
 {
     public interface IStudentService
     {
         public MCQPaperDTO GetMcqPaper(string code);
-        public List<MCQAnswerSheetDTO> GetAnswerSheets(string email);
+        public List<MCQAnswerSheetDTO> GetMCQAnswerSheets(string email);
+        public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string studentEmailId);
+        public AnswerSheetDTO GetAnswerSheet(string paperCode, string studentEmailId);
+        public DescriptiveAnswerSheetDTO GetDescriptiveAnswerSheetForExam(string papercode);
     }
 
     public class StudentServiceImpl : IStudentService
     {
-        public StudentServiceImpl(IMapper mapper, IMCQPaperRepo paperRepo, IMCQAnswerSheetRepo answerSheetRepo)
+        #region Constructor and Properties
+        public StudentServiceImpl(IMapper mapper, IMCQPaperRepo paperRepo
+            , IMCQAnswerSheetRepo answerSheetRepo, IDescriptiveAnswerSheetRepo descriptiveAnswerSheetRepo
+            , IDescriptivePaperRepo descriptivePaperRepo, IFirebaseUpload fire)
         {
             Mapper = mapper;
             PaperRepo = paperRepo;
             AnswerSheetRepo = answerSheetRepo;
+            DescriptiveAnswerSheetRepo = descriptiveAnswerSheetRepo;
+            DescriptivePaperRepo = descriptivePaperRepo;
+            Fire = fire;
         }
 
         public IMapper Mapper { get; }
         public IMCQPaperRepo PaperRepo { get; }
         public IMCQAnswerSheetRepo AnswerSheetRepo { get; }
-
-        public List<MCQAnswerSheetDTO> GetAnswerSheets(string email)
+        public IDescriptiveAnswerSheetRepo DescriptiveAnswerSheetRepo { get; }
+        public IDescriptivePaperRepo DescriptivePaperRepo { get; }
+        public IFirebaseUpload Fire { get; }
+        #endregion
+        public List<MCQAnswerSheetDTO> GetMCQAnswerSheets(string email)
         {
             var answerSheet = AnswerSheetRepo.GetByStudentEmail(email);
 
@@ -57,6 +67,54 @@ namespace ExamPortal.Services
 
             return paperdto;
         }
+        public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string studentEmailId)
+        {
+            var answersheet = new MCQAnswerSheet();
+            var paper1 = PaperRepo.GetByPaperCode(mcqpaperdto.PaperCode);
+            var paper = Mapper.Map<MCQPaper, MCQPaperDTO>(paper1);
+            foreach (var que in paper1.Questions)
+                paper.Questions.Add(que.EntityToDto());
+            int TotalMarks = 0, ObtainedMarks = 0;
+            for (int i = 0; i < paper.Questions.Count; i++)
+            {
+                TotalMarks += paper.Questions[i].Marks;
+                if (mcqpaperdto.Questions[i].TrueAnswer == paper.Questions[i].TrueAnswer)
+                    ObtainedMarks += mcqpaperdto.Questions[i].Marks;
+            }
+            answersheet.MarksObtained = ObtainedMarks;
+            answersheet.StudentEmailId = studentEmailId;
+            answersheet.SubmittedTime = DateTime.Now;
+            answersheet.MCQPaperId = paper1.Id;
 
+            AnswerSheetRepo.SetMCQAnswerSheet(answersheet);
+
+            KeyValuePair<int, int> ret = new KeyValuePair<int, int>(TotalMarks, ObtainedMarks);
+            return ret;
+        }
+
+        public AnswerSheetDTO GetAnswerSheet(string paperCode, string studentEmailId)
+        {
+            switch (CodeGenerator.GetPaperType(paperCode))
+            {
+                case EPaperType.MCQ:
+                    var ans = AnswerSheetRepo.GetByPaperCodeAndStudentEmail(paperCode, studentEmailId);
+                    return ans == null ? null : Mapper.Map<MCQAnswerSheet, MCQAnswerSheetDTO>(ans);
+                case EPaperType.Descriptive:
+                    var ans1 = DescriptiveAnswerSheetRepo.GetByPaperCodeAndStudentEmail(paperCode, studentEmailId);
+                    return ans1 == null ? null : Mapper.Map<DescriptiveAnswerSheet, DescriptiveAnswerSheetDTO>(ans1);
+            }
+            return null;
+        }
+
+        public DescriptiveAnswerSheetDTO GetDescriptiveAnswerSheetForExam(string papercode)
+        {
+            var paper = Mapper.Map<DescriptivePaper, DescriptivePaperDTO>(DescriptivePaperRepo.GetByPaperCode(papercode));
+            paper.PaperPdfUrl = paper.PaperPdfUrl.Replace(Fire.Ampersand, "&");
+            var ansSheet = new DescriptiveAnswerSheetDTO()
+            {
+                Paper = paper
+            };
+            return ansSheet;
+        }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using ExamPortal.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ExamPortal.Utilities
 {
@@ -20,6 +16,7 @@ namespace ExamPortal.Utilities
         public DbSet<MCQOption> MCQOptions { get; set; }
 
         public DbSet<DescriptivePaper> DescriptivePapers { get; set; }
+        public DbSet<DescriptiveAnswerSheet> DescriptiveAnswerSheets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

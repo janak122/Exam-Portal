@@ -3,8 +3,6 @@ using ExamPortal.DTOS;
 using ExamPortal.Models;
 using ExamPortal.Repositories;
 using ExamPortal.Utilities;
-using Microsoft.AspNetCore.Identity;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,106 +14,102 @@ namespace ExamPortal.Services
         /// <summary>
         /// save paper to database and returns sharable code
         /// </summary>
-        public string CreatePaper(MCQPaperDTO paper);
+        public string CreateMCQPaper(MCQPaperDTO paper);
         /// <summary>
         /// return paper associated with given code.
         /// </summary>
-        public MCQPaperDTO getPaperByCode(string code);
-        public List<MCQPaperDTO> getPapersByEmailId(string emailId);
-        public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string Name);
-        public MCQAnswerSheet GetMCQAnswerSheetByCodeAndEmail(string paperCode, string Name);
+        public MCQPaperDTO getMCQPaperByCode(string code);
+        public IEnumerable<PaperDTO> getMCQPapersByEmailId(string emailId);
         public Task<string> CreateDescriptivePaper(DescriptivePaperDTO DesPaper);
+        public DescriptivePaperDTO getDescriptivePaper(string code);
+
+        /// <summary>
+        /// can delete any paper associated with given code
+        /// </summary>
+        public Task deletePaper(string papercode);
+
     }
 
     public class TeacherServiceImpl : ITeacherService
     {
+        #region Constructor and Properties
+
         public TeacherServiceImpl(IMapper mapper, IMCQPaperRepo paperRepo
-            , IMCQAnswerSheetRepo answerSheetRepo, IFirebaseUpload fire,IDescriptivePaperRepo descriptivePaperRepo)
+            , IMCQAnswerSheetRepo answerSheetRepo, IFirebaseUpload fire, IDescriptivePaperRepo descriptivePaperRepo)
         {
             Mapper = mapper;
-            PaperRepo = paperRepo;
+            McqPaperRepo = paperRepo;
             AnswerSheetRepo = answerSheetRepo;
             Fire = fire;
             DescriptivePaperRepo = descriptivePaperRepo;
         }
 
         public IMapper Mapper { get; }
-        public IMCQPaperRepo PaperRepo { get; }
+        public IMCQPaperRepo McqPaperRepo { get; }
         public IMCQAnswerSheetRepo AnswerSheetRepo { get; }
         public IFirebaseUpload Fire { get; }
         public IDescriptivePaperRepo DescriptivePaperRepo { get; }
-
-        public string CreatePaper(MCQPaperDTO paper)
+        #endregion
+        public string CreateMCQPaper(MCQPaperDTO paper)
         {
-            string code = CodeGenerator.GetSharableCode();
+            string code = CodeGenerator.GetSharableCode(EPaperType.MCQ);
             MCQPaper mcqPaper = Mapper.Map<MCQPaperDTO, MCQPaper>(paper);
             mcqPaper.PaperCode = code;
             foreach (var que in paper.Questions)
                 mcqPaper.Questions.Add(que.DtoTOEntity());
-            PaperRepo.Create(mcqPaper);
+            McqPaperRepo.Create(mcqPaper);
             return code;
         }
 
-        public MCQAnswerSheet GetMCQAnswerSheetByCodeAndEmail(string paperCode, string Name)
+        public MCQPaperDTO getMCQPaperByCode(string code)
         {
-            return AnswerSheetRepo.GetByPaperCodeAndStudentEmail(paperCode, Name);
-        }
-
-        public MCQPaperDTO getPaperByCode(string code)
-        {
-            var paper = PaperRepo.GetByPaperCode(code);
+            var paper = McqPaperRepo.GetByPaperCode(code);
             var paperdto = Mapper.Map<MCQPaper, MCQPaperDTO>(paper);
             foreach (var que in paper.Questions)
                 paperdto.Questions.Add(que.EntityToDto());
             return paperdto;
         }
 
-        public List<MCQPaperDTO> getPapersByEmailId(string emailId)
+        public IEnumerable<PaperDTO> getMCQPapersByEmailId(string emailId)
         {
-            var ans = Mapper.Map<IEnumerable<MCQPaper>, List<MCQPaperDTO>>(PaperRepo.GetByTeacherEmail(emailId));
-            return ans;
-        }
-
-        public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string Name)
-        {
-            var answersheet = new MCQAnswerSheet();
-            var paper1 = PaperRepo.GetByPaperCode(mcqpaperdto.PaperCode);
-            var paper = Mapper.Map<MCQPaper, MCQPaperDTO>(paper1);
-            foreach (var que in paper1.Questions)
-                paper.Questions.Add(que.EntityToDto());
-            int TotalMarks = 0, ObtainedMarks = 0;
-            for (int i = 0; i < paper.Questions.Count; i++)
-            {
-                TotalMarks += paper.Questions[i].Marks;
-                if (mcqpaperdto.Questions[i].TrueAnswer == paper.Questions[i].TrueAnswer)
-                    ObtainedMarks += mcqpaperdto.Questions[i].Marks;
-            }
-            answersheet.MarksObtained = ObtainedMarks;
-            answersheet.StudentEmailId = Name;
-            answersheet.SubmittedTime = DateTime.Now;
-            answersheet.MCQPaperId = paper1.Id;
-
-            AnswerSheetRepo.SetMCQAnswerSheet(answersheet);
-
-            KeyValuePair<int, int> ret = new KeyValuePair<int, int>(TotalMarks, ObtainedMarks);
-            return ret;
+            var ans = Mapper.Map<IEnumerable<MCQPaper>, List<PaperDTO>>(McqPaperRepo.GetByTeacherEmail(emailId));
+            var ansfinal = ans.Concat(Mapper.Map<IEnumerable<DescriptivePaper>, List<PaperDTO>>(DescriptivePaperRepo.GetByTeacherEmail(emailId)));
+            return ansfinal;
         }
 
         public async Task<string> CreateDescriptivePaper(DescriptivePaperDTO DesPaper)
         {
-            string code = CodeGenerator.GetSharableCode(); ;
+            string code = CodeGenerator.GetSharableCode(EPaperType.Descriptive);
             DesPaper.PaperCode = code;
-            string linkwith = await Fire.Upload(DesPaper), link = "";
+            string linkwith = await Fire.Upload(DesPaper);
+            DesPaper.PaperPdfUrl = linkwith.Replace("&", Fire.Ampersand);
 
-            for (int i = 0; i < linkwith.Length; i++)   //Sql Database Cannot Store Special Character like '&' , So  storing '&' == "EPF"
-            {
-                link += (linkwith[i] == '&') ? Fire.Ampersand : $"{linkwith[i]}";
-            }
             DescriptivePaper paper = Mapper.Map<DescriptivePaperDTO, DescriptivePaper>(DesPaper);
-            paper.Link = link;
             DescriptivePaperRepo.Create(paper);
 
             return code;
+        }
+
+        public DescriptivePaperDTO getDescriptivePaper(string code)
+        {
+            var paper = DescriptivePaperRepo.GetByPaperCode(code);
+            var paperdto = Mapper.Map<DescriptivePaper, DescriptivePaperDTO>(paper);
+            paperdto.PaperPdfUrl = paperdto.PaperPdfUrl.Replace(Fire.Ampersand, "&");
+            return paperdto;
+        }
+
+        public async Task deletePaper(string papercode)
+        {
+            switch (CodeGenerator.GetPaperType(papercode))
+            {
+                case EPaperType.MCQ:
+                    McqPaperRepo.Delete(papercode);
+                    break;
+                case EPaperType.Descriptive:
+                    DescriptivePaperRepo.Delete(papercode);
+                    await Fire.Delete(papercode);
+                    break;
+            }
         }
     }
 }

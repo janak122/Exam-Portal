@@ -1,15 +1,11 @@
-﻿using ExamPortal.DTOS;
+﻿using AutoMapper;
+using ExamPortal.DTOS;
+using ExamPortal.Models;
 using ExamPortal.Repositories;
 using ExamPortal.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ExamPortal.Models;
 
 namespace ExamPortal.Utilities
 {
@@ -21,6 +17,8 @@ namespace ExamPortal.Utilities
             services.AddScoped<IStudentService, StudentServiceImpl>();
             services.AddScoped<IMCQPaperRepo, MCQPaperRepoImpl>();
             services.AddScoped<IMCQAnswerSheetRepo, MCQAnswerSheetRepoImpl>();
+            services.AddScoped<IDescriptiveAnswerSheetRepo, DescriptiveAnswerSheetRepoImpl>();
+            services.AddScoped<IDescriptivePaperRepo, DescriptivePaperRepoImpl>();
             services.AddAutoMapper(typeof(AutoMapperConfig));
             services.AddScoped<IFirebaseUpload, FirebaseUpload>();
             services.AddScoped<IDescriptivePaperRepo, DescriptivePaperRepoImpl>();
@@ -59,9 +57,11 @@ namespace ExamPortal.Utilities
 
         public static MCQQuestionDTO EntityToDto(this MCQQuestion question)
         {
-            MCQQuestionDTO question1 = new MCQQuestionDTO();
-            question1.QuestionText = question.QuestionText;
-            question1.Marks = question.Marks;
+            MCQQuestionDTO question1 = new MCQQuestionDTO
+            {
+                QuestionText = question.QuestionText,
+                Marks = question.Marks
+            };
             var i = 0;
             foreach (var opt in question.MCQOptions)
             {

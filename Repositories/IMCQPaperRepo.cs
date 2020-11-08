@@ -13,6 +13,7 @@ namespace ExamPortal.Repositories
         public MCQPaper GetByPaperCode(string paperCode);
         public IEnumerable<MCQPaper> GetByTeacherEmail(string email);
         public Task<MCQPaper> Create(MCQPaper paper);
+        public void Delete(string papercode);
     }
 
     public class MCQPaperRepoImpl : IMCQPaperRepo
@@ -51,6 +52,12 @@ namespace ExamPortal.Repositories
             return paper;
         }
 
+        public void Delete(string papercode)
+        {
+            AppDbContext.MCQPapers.Remove(AppDbContext.MCQPapers.Where(p => p.PaperCode.Equals(papercode)).FirstOrDefault());
+            AppDbContext.SaveChanges();
+        }
+
         public MCQPaper GetByPaperCode(string paperCode)
         {
             using var transaction = AppDbContext.Database.BeginTransaction();
@@ -61,6 +68,7 @@ namespace ExamPortal.Repositories
                 .FirstOrDefault(paper => paper.PaperCode.Equals(paperCode));
                 var questions = AppDbContext.MCQQuestions
                     .Include(que => que.MCQOptions)
+                    .Include(que => que.TrueAnswer)
                     .Where(que => que.MCQPaperId == ans.Id);
                 ans.Questions = questions.ToList();
                 transaction.Commit();
