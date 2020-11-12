@@ -15,26 +15,32 @@
     </div>
 </div>
 <div class="col-md-8 mx-auto">
-    <form asp-action="@nameof(StudentController.SubmitDescriptivePaper)" asp-controller="student">
+    <form asp-action="@nameof(StudentController.SubmitDescriptivePaper)" asp-controller="student"  enctype="multipart/form-data" method="post" >
         <div class="form-group">
             <div class="custom-file">
-                <input type="file" class="custom-file-input" id="fileUpload" accept="application/pdf" asp-for="AnswerSheet" />
+                <input type="file" class="custom-file-input" id="fileUpload" accept="application/pdf" asp-for="@Model.AnswerSheet" />
                 <label class="custom-file-label" id="fileUploadLbl" for="fileUpload">Upload Your Answersheet</label>
             </div>
-            <span asp-validation-for="AnswerSheet" class="text-danger"></span>
+            <span asp-validation-for="@Model.AnswerSheet" class="text-danger"></span>
         </div>
-        <input type="hidden" asp-for="Paper" />
+        <input type="hidden" asp-for="@Model.Paper.PaperCode" />
         <div class="form-group">
-            <button class="btn btn-success"><span><i class="fa fa-plane"></i></span> Submit</button>
+            <button class="btn btn-success" id="submit"><span><i class="fa fa-plane"></i></span> Submit</button>
         </div>
     </form>
 </div>
 <div class="container">
     <object id="pdfFrame" width="100%" height="700px"></object>
 </div>
+<input type="hidden" value="@Model.Paper.DeadLine" id="time" />
 @section Scripts{
     <script>
         $(document).ready(function () {
+
+            $("#fileUpload").change(function () {
+                $("#fileUploadLbl").html($(this).val().split("\\").pop());
+            });
+
             var pdfUrl = "@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(pdfURL))";
             $("#pdfFrame").attr("data", pdfUrl);
             var interval = setInterval(() => {
@@ -59,11 +65,10 @@
                 if (timeleft <= 0) {
                     clearInterval(interval);
                     $('#timer').html("<b>Time is over, further selection will not be considered<b>");
-                    $('input[type=submit]').css('display', 'none');
+                    //$('#submit').css('display', 'none');
                 }
 
             }, 1000);
-
         });
     </script>
 }

@@ -33,21 +33,23 @@ namespace ExamPortal.Repositories
                 temp.Add(que.TrueAnswer);
                 que.TrueAnswer = null;
             }
-            await using var transaction = await AppDbContext.Database.BeginTransactionAsync();
-            try
+            using (var transaction = await AppDbContext.Database.BeginTransactionAsync())
             {
-                AppDbContext.Add(paper);
-                AppDbContext.SaveChanges();
-                var i = 0;
-                foreach (var que in paper.Questions)
-                    que.TrueAnswer = temp[i++];
-                AppDbContext.MCQPapers.Attach(paper);
-                AppDbContext.SaveChanges();
-                await transaction.CommitAsync();
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
+                try
+                {
+                    AppDbContext.Add(paper);
+                    AppDbContext.SaveChanges();
+                    var i = 0;
+                    foreach (var que in paper.Questions)
+                        que.TrueAnswer = temp[i++];
+                    AppDbContext.MCQPapers.Attach(paper);
+                    AppDbContext.SaveChanges();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
             }
             return paper;
         }
@@ -60,24 +62,40 @@ namespace ExamPortal.Repositories
 
         public MCQPaper GetByPaperCode(string paperCode)
         {
-            using var transaction = AppDbContext.Database.BeginTransaction();
-            MCQPaper ans = new MCQPaper();
-            try
+            MCQPaper ans = null;
+            using (var transaction = AppDbContext.Database.BeginTransaction())
             {
-                ans = AppDbContext.MCQPapers
-                .FirstOrDefault(paper => paper.PaperCode.Equals(paperCode));
-                var questions = AppDbContext.MCQQuestions
-                    .Include(que => que.MCQOptions)
-                    .Include(que => que.TrueAnswer)
-                    .Where(que => que.MCQPaperId == ans.Id);
-                ans.Questions = questions.ToList();
-                transaction.Commit();
+                try
+                {
+                    ans = AppDbContext.MCQPapers
+                        .FirstOrDefault(paper => paper.PaperCode == paperCode);
+                    if (ans == null)
+                    {
+                        transaction.Commit();
+                        return null;
+                    }
+                    ans.Questions =
+                        AppDbContext.MCQQuestions
+                        .Include(que => que.TrueAnswer)
+                        .Where(que => que.MCQPaper.PaperCode == paperCode)
+                        .ToList();
+
+                    foreach (var que in ans.Questions)
+                    {
+                        que.TrueAnswer = que.MCQOptions[0];
+                        que.MCQOptions = AppDbContext.MCQOptions
+                                        .Where(opt => opt.MCQQuestionId == que.QuestionId)
+                                        .ToList();
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                }
             }
-            catch (Exception)
-            {
-                transaction.Rollback();
-            }
-            return ans;
+            return ans ?? new MCQPaper();
         }
 
         public IEnumerable<MCQPaper> GetByTeacherEmail(string email)

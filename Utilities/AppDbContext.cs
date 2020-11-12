@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPortal.Utilities
 {
+    //Db context class for interacting in Database
     public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }

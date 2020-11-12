@@ -14,7 +14,7 @@ namespace ExamPortal.DTOS
         public string TeacherEmailId { get; set; }
         public DateTime CreatedDate { get; set; }
         [Required]
-        [DeadLineValidate(ErrorMessage = "please specify valid date maximum 62 days are valid")]
+        [DeadLineValidate(maxday: 62, ErrorMessage = "please specify valid date maximum 62 days are valid")]
         public DateTime DeadLine { get; set; }
         [Required]
         public string PaperTitle { get; set; }
@@ -24,11 +24,18 @@ namespace ExamPortal.DTOS
 
     public class DeadLineValidate : ValidationAttribute
     {
+        public DeadLineValidate(int maxday)
+        {
+            Maxday = maxday;
+        }
+
+        public int Maxday { get; }
+
         public override bool IsValid(object value)
         {
             var date = Convert.ToDateTime(value);
 
-            return DateTime.Today <= date && date <= DateTime.Today.AddDays(62);
+            return DateTime.Today <= date && date <= DateTime.Today.AddDays(Maxday);
         }
     }
 }

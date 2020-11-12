@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ExamPortal.Controllers
 {
@@ -101,7 +102,7 @@ namespace ExamPortal.Controllers
                 ViewBag.TotalMarks = marks.Key;
                 ViewBag.Message = GetMessage(marks.Key, marks.Value);
                 ViewBag.User = User.Identity.Name;
-                return View();
+                return View("MCQPaperResult");
             }
             return View("SubmitMCQPaper", mCQPaperDTO);
         }
@@ -112,16 +113,16 @@ namespace ExamPortal.Controllers
             return View(StudentService.GetDescriptiveAnswerSheetForExam(papercode));
         }
         [HttpPost]
-        public IActionResult SubmitDescriptivePaper(DescriptiveAnswerSheetDTO answerSheet)
+        public async Task<IActionResult> SubmitDescriptivePaper(DescriptiveAnswerSheetDTO answerSheet1)
         {
-            return RedirectToAction(nameof(GetResults));
+            await StudentService.SetDescriptiveAnswerSheet(answerSheet1, User.Identity.Name);
+            return RedirectToAction(nameof(HomeController.Index));
         }
         [HttpGet]
         public IActionResult GetResults()
         {
             return View(StudentService.GetMCQAnswerSheets(User.Identity.Name));
         }
-
 
     }
 }

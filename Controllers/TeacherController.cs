@@ -2,6 +2,7 @@
 using ExamPortal.Services;
 using ExamPortal.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 namespace ExamPortal.Controllers
@@ -13,6 +14,7 @@ namespace ExamPortal.Controllers
 
         public ITeacherService TeacherService { get; }
         #endregion
+
 
 
         public IActionResult Index() => View();
@@ -46,9 +48,9 @@ namespace ExamPortal.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeletePaper(string paperCode)
+        public async Task<IActionResult> DeletePaper(string paperCode)
         {
-            TeacherService.deletePaper(paperCode);
+            await TeacherService.deletePaper(paperCode);
             return RedirectToAction(nameof(MyPapers));
         }
         [HttpGet]
@@ -77,6 +79,33 @@ namespace ExamPortal.Controllers
                 var paperdto = TeacherService.getDescriptivePaper(papercode);
                 return View("DescriptivePaperDetails", paperdto);
             }
+        }
+        [HttpGet]
+        public IActionResult Responses(string papercode)
+        {
+            if (CodeGenerator.GetPaperType(papercode) == EPaperType.MCQ)
+            {
+                var answersheet = TeacherService.GetAnswerSheetsBycode(papercode);
+                return View(answersheet);
+            }
+            else
+            {
+                var answersheet = TeacherService.GetDescriptiveAnswerSheetsBycode(papercode);
+                return View("ResponsesOfDescriptive", answersheet);
+            }
+        }
+        [HttpPost]
+        public IActionResult GetEnterMarks(string AnswerSheet, string Paper)
+        {
+            var answersheet = JsonConvert.DeserializeObject<DescriptiveAnswerSheetDTO>(AnswerSheet);
+            answersheet.Paper = JsonConvert.DeserializeObject<DescriptivePaperDTO>(Paper);
+            return View("EnterMarks", answersheet);
+        }
+        [HttpPost]
+        public IActionResult PostEnterMarks(string papercode, int marksgiven, string studentname)
+        {
+            TeacherService.SetMarksInDescriptivePaper(papercode, marksgiven, studentname);
+            return RedirectToAction("Responses", new { papercode = papercode });
         }
     }
 }

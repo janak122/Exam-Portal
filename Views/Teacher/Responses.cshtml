@@ -1,0 +1,48 @@
+﻿@model (MCQPaperDTO Paper, List<MCQAnswerSheetDTO> answersheet)
+@{
+    ViewData["Title"] = "Responses";
+}
+
+<h3>Responses</h3>
+<br />
+
+@if (Model.answersheet != null && Model.answersheet.Count > 0)
+{
+    <h5>Paper Title : <small>@Model.Paper.PaperTitle</small></h5>
+    <h5>Paper Code  : <small>@Model.Paper.PaperCode</small></h5>
+
+    <h5>Start Time  : <small>@Model.Paper.CreatedDate</small></h5>
+
+    <h5>Deadline    : <small>@Model.Paper.DeadLine</small></h5>
+
+    <h5>Total Marks : <small>@Model.Paper.TotalMarks</small></h5>
+
+    <br />
+    <br />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student Email</th>
+                <th>Marks Obtained</th>
+                <th>Submitted Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.answersheet.Count; i++)
+            {
+                <tr>
+                    <td>@Model.answersheet[i].StudentEmailId</td>
+                    <td><b>@Model.answersheet[i].MarksObtained</b></td>
+                    <td>@Model.answersheet[i].SubmittedTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h4>No Response</h4>
+}
+<div class="my-3">
+    <a asp-action="MyPapers">Go To List</a>
+</div>

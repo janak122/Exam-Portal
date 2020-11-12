@@ -5,9 +5,11 @@ using ExamPortal.Repositories;
 using ExamPortal.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ExamPortal.Services
 {
+    //Student based services
     public interface IStudentService
     {
         public MCQPaperDTO GetMcqPaper(string code);
@@ -15,11 +17,13 @@ namespace ExamPortal.Services
         public KeyValuePair<int, int> SetMCQAnswerSheet(MCQPaperDTO mcqpaperdto, string studentEmailId);
         public AnswerSheetDTO GetAnswerSheet(string paperCode, string studentEmailId);
         public DescriptiveAnswerSheetDTO GetDescriptiveAnswerSheetForExam(string papercode);
+        public Task SetDescriptiveAnswerSheet(DescriptiveAnswerSheetDTO desanswersheetdto, string studentEmailId);
     }
 
     public class StudentServiceImpl : IStudentService
     {
         #region Constructor and Properties
+
         public StudentServiceImpl(IMapper mapper, IMCQPaperRepo paperRepo
             , IMCQAnswerSheetRepo answerSheetRepo, IDescriptiveAnswerSheetRepo descriptiveAnswerSheetRepo
             , IDescriptivePaperRepo descriptivePaperRepo, IFirebaseUpload fire)
@@ -38,6 +42,7 @@ namespace ExamPortal.Services
         public IDescriptiveAnswerSheetRepo DescriptiveAnswerSheetRepo { get; }
         public IDescriptivePaperRepo DescriptivePaperRepo { get; }
         public IFirebaseUpload Fire { get; }
+
         #endregion
         public List<MCQAnswerSheetDTO> GetMCQAnswerSheets(string email)
         {
@@ -48,7 +53,9 @@ namespace ExamPortal.Services
             foreach (var ele in answerSheet)
             {
                 foreach (var que in ele.MCQPaper.Questions)
+                {
                     ans[i].TotalMarks += que.Marks;
+                }
                 i++;
             }
             return ans;
@@ -62,8 +69,11 @@ namespace ExamPortal.Services
             MCQPaperDTO paperdto = new MCQPaperDTO();
             Mapper.Map(paper, paperdto);
             foreach (var que in paper.Questions)
+            {
+                que.MCQOptions.Shuffle();
                 paperdto.Questions.Add(que.EntityToDto());
-            paperdto.Questions.ForEach(que => que.TrueAnswer = 0);
+            }
+            paperdto.Questions.ForEach(que => que.TrueAnswer = -1);
 
             return paperdto;
         }
@@ -84,7 +94,7 @@ namespace ExamPortal.Services
             answersheet.MarksObtained = ObtainedMarks;
             answersheet.StudentEmailId = studentEmailId;
             answersheet.SubmittedTime = DateTime.Now;
-            answersheet.MCQPaperId = paper1.Id;
+            answersheet.MCQPaperId = paper1.PaperId;
 
             AnswerSheetRepo.SetMCQAnswerSheet(answersheet);
 
@@ -98,10 +108,16 @@ namespace ExamPortal.Services
             {
                 case EPaperType.MCQ:
                     var ans = AnswerSheetRepo.GetByPaperCodeAndStudentEmail(paperCode, studentEmailId);
-                    return ans == null ? null : Mapper.Map<MCQAnswerSheet, MCQAnswerSheetDTO>(ans);
+                    var ret = Mapper.Map<MCQAnswerSheet, MCQAnswerSheetDTO>(ans);
+                    if (ret != null)
+                        ret.Paper = Mapper.Map<MCQPaper, MCQPaperDTO>(ans.MCQPaper);
+                    return ans == null ? null : ret;
                 case EPaperType.Descriptive:
                     var ans1 = DescriptiveAnswerSheetRepo.GetByPaperCodeAndStudentEmail(paperCode, studentEmailId);
-                    return ans1 == null ? null : Mapper.Map<DescriptiveAnswerSheet, DescriptiveAnswerSheetDTO>(ans1);
+                    var ret1 = Mapper.Map<DescriptiveAnswerSheet, DescriptiveAnswerSheetDTO>(ans1);
+                    if (ret1 != null)
+                        ret1.Paper = Mapper.Map<DescriptivePaper, DescriptivePaperDTO>(ans1.DescriptivePaper);
+                    return ans1 == null ? null : ret1;
             }
             return null;
         }
@@ -115,6 +131,17 @@ namespace ExamPortal.Services
                 Paper = paper
             };
             return ansSheet;
+        }
+        public async Task SetDescriptiveAnswerSheet(DescriptiveAnswerSheetDTO desanswersheetdto, string studentEmailId)
+        {
+            var answersheet = new DescriptiveAnswerSheet();
+            answersheet.StudentEmailId = studentEmailId;
+            answersheet.SubmittedTime = DateTime.Now;
+            answersheet.DescriptivePaperId = DescriptivePaperRepo.GetByPaperCode(desanswersheetdto.Paper.PaperCode).PaperId;
+            string linkwith = await Fire.Upload(desanswersheetdto.AnswerSheet.OpenReadStream(), studentEmailId, desanswersheetdto.Paper.PaperCode);
+            answersheet.AnswerLink = linkwith.Replace("&", Fire.Ampersand);
+            //System.Diagnostics.Debug.Print(answersheet.AnswerLink);
+            DescriptiveAnswerSheetRepo.SetDescriptiveAnswerSheet(answersheet);
         }
     }
 }
