@@ -6,7 +6,12 @@
     @{ await Html.RenderPartialAsync("_PartialDateTimeCss");}
 }
 
-<h1>Make Paper</h1>
+
+@await Component.InvokeAsync("CurrPath", new
+{
+    header = "Make Paper",
+    paths = new List<EPath>() { EPath.DashBoard, EPath.MakeMCQPaper }
+})
 
 <form asp-action="MakePaper" id="MakePaper">
     <div class="form-row">

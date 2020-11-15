@@ -14,16 +14,19 @@ namespace ExamPortal.Repositories
         public IEnumerable<MCQPaper> GetByTeacherEmail(string email);
         public Task<MCQPaper> Create(MCQPaper paper);
         public void Delete(string papercode);
+        public Tuple<int, IEnumerable<Paper>> getAllPapersByEmailId(string emailId, int page);
     }
 
     public class MCQPaperRepoImpl : IMCQPaperRepo
     {
+        #region Constructor And Propertied
         public MCQPaperRepoImpl(AppDbContext appDbContext)
         {
             AppDbContext = appDbContext;
         }
 
         private AppDbContext AppDbContext { get; }
+        #endregion
 
         public async Task<MCQPaper> Create(MCQPaper paper)
         {
@@ -102,6 +105,14 @@ namespace ExamPortal.Repositories
         {
             var ans = AppDbContext.MCQPapers.Where(paper => paper.TeacherEmailId.Equals(email));
             return ans;
+        }
+        public Tuple<int, IEnumerable<Paper>> getAllPapersByEmailId(string emailId, int page)
+        {
+            int rows = 5;
+            var paper = AppDbContext.Papers.Where(paper => paper.TeacherEmailId.Equals(emailId)).Skip(rows * (page - 1)).Take(rows);
+            var total = AppDbContext.Papers.Where(paper => paper.TeacherEmailId.Equals(emailId)).Count();
+            double pageCount = (double)((decimal)total / Convert.ToDecimal(rows));
+            return new Tuple<int, IEnumerable<Paper>>((int)Math.Ceiling(pageCount), paper);
         }
     }
 

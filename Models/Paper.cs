@@ -12,5 +12,7 @@ namespace ExamPortal.Models
         public DateTime CreatedDate { get; set; }
         public DateTime DeadLine { get; set; }
         public string PaperTitle { get; set; }
+        public int TotalMarks { get; set; }
+
     }
 }

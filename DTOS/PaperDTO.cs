@@ -8,17 +8,17 @@ namespace ExamPortal.DTOS
     {
         public PaperDTO()
         {
-            CreatedDate = DateTime.Now;
+            CreatedDate = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
         }
         public string PaperCode { get; set; }
         public string TeacherEmailId { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public string CreatedDate { get; set; }
         [Required]
         [DeadLineValidate(maxday: 62, ErrorMessage = "please specify valid date maximum 62 days are valid")]
-        public DateTime DeadLine { get; set; }
+        public string DeadLine { get; set; }
         [Required]
         public string PaperTitle { get; set; }
-
+        public int TotalMarks { get; set; }
         public EPaperType Type { get; set; }
     }
 

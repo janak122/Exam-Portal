@@ -22,9 +22,12 @@ namespace ExamPortal.Controllers
         }
         #endregion
 
-        public IActionResult Index()
+        public IActionResult Index(int? pages)
         {
-            return RedirectToAction(nameof(GetResults));
+            var x = StudentService.GetAllAnswerSheets(User.Identity.Name, pages ?? 1);
+            ViewBag.currentpage = pages ?? 1;
+            ViewBag.total = x.total;
+            return View(x.answersheet);
         }
         [HttpGet]
         public IActionResult PaperCode()
@@ -52,7 +55,7 @@ namespace ExamPortal.Controllers
                 if (ansSheet != null)
                     AlreadySubmitted((ansSheet as MCQAnswerSheetDTO).Paper.TeacherEmailId);
                 var paperdto = StudentService.GetMcqPaper(papercode);
-                if (paperdto == null)
+                if (paperdto.paper == null)
                     return InvalidCode();
 
                 return View("Verify", paperdto);
@@ -77,9 +80,9 @@ namespace ExamPortal.Controllers
             return View(paperdto);
         }
         [HttpPost]
-        public IActionResult SubmitMCQPaper(MCQPaperDTO mCQPaperDTO)
+        public IActionResult SubmitMCQPaper(MCQPaperDTO paper)
         {
-            if (mCQPaperDTO.DeadLine >= new DateTime())
+            if (Convert.ToDateTime(paper.DeadLine) >= new DateTime())
             {
                 Func<int, int, string> GetMessage = (total, obtained) =>
                 {
@@ -97,14 +100,14 @@ namespace ExamPortal.Controllers
                         msg = "Requires Special Meeting with Faculty";
                     return msg;
                 };
-                KeyValuePair<int, int> marks = StudentService.SetMCQAnswerSheet(mCQPaperDTO, User.Identity.Name);
+                KeyValuePair<int, int> marks = StudentService.SetMCQAnswerSheet(paper, User.Identity.Name);
                 ViewBag.MarksObtained = marks.Value;
                 ViewBag.TotalMarks = marks.Key;
                 ViewBag.Message = GetMessage(marks.Key, marks.Value);
                 ViewBag.User = User.Identity.Name;
                 return View("MCQPaperResult");
             }
-            return View("SubmitMCQPaper", mCQPaperDTO);
+            return View("SubmitMCQPaper", paper);
         }
         [HttpGet]
         public IActionResult SubmitDescriptivePaper(string papercode)
@@ -117,11 +120,6 @@ namespace ExamPortal.Controllers
         {
             await StudentService.SetDescriptiveAnswerSheet(answerSheet1, User.Identity.Name);
             return RedirectToAction(nameof(HomeController.Index));
-        }
-        [HttpGet]
-        public IActionResult GetResults()
-        {
-            return View(StudentService.GetMCQAnswerSheets(User.Identity.Name));
         }
 
     }

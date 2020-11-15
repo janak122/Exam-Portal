@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
-using ExamPortal.DTOS;
-using ExamPortal.Models;
 using ExamPortal.Repositories;
 using ExamPortal.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ExamPortal.Utilities
 {
@@ -42,40 +39,6 @@ namespace ExamPortal.Utilities
                 options.Password.RequiredUniqueChars = 3;
                 options.Password.RequireNonAlphanumeric = false;
             }).AddEntityFrameworkStores<AppDbContext>();
-        }
-
-        //DTO to Entity for MCQQuestionDto <-> MCQQuestion done manually to configure the options and its answer
-        public static MCQQuestion DtoTOEntity(this MCQQuestionDTO questionDTO)
-        {
-            MCQQuestion question = new MCQQuestion();
-            question.QuestionText = questionDTO.QuestionText;
-            question.Marks = questionDTO.Marks;
-            for (var i = 0; i < questionDTO.Opetions.Count(); i++)
-            {
-                var opetion = new MCQOption() { OptionText = questionDTO.Opetions[i] };
-                question.MCQOptions.Add(opetion);
-                if (i == questionDTO.TrueAnswer)
-                    question.TrueAnswer = opetion;
-            }
-            return question;
-        }
-
-        public static MCQQuestionDTO EntityToDto(this MCQQuestion question)
-        {
-            MCQQuestionDTO question1 = new MCQQuestionDTO
-            {
-                QuestionText = question.QuestionText,
-                Marks = question.Marks
-            };
-            var i = 0;
-            foreach (var opt in question.MCQOptions)
-            {
-                question1.Opetions.Add(opt.OptionText);
-                if (opt.MCQOptionId == question.TrueAnswer.MCQOptionId)
-                    question1.TrueAnswer = i;
-                i++;
-            }
-            return question1;
         }
 
         public static void Shuffle<T>(this IList<T> list)

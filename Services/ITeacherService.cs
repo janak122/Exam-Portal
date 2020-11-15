@@ -3,6 +3,7 @@ using ExamPortal.DTOS;
 using ExamPortal.Models;
 using ExamPortal.Repositories;
 using ExamPortal.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace ExamPortal.Services
         public (MCQPaperDTO, List<MCQAnswerSheetDTO>) GetAnswerSheetsBycode(string papercode);
         public (DescriptivePaperDTO, List<DescriptiveAnswerSheetDTO>) GetDescriptiveAnswerSheetsBycode(string papercode);
         public void SetMarksInDescriptivePaper(string papercode, int marksgiven, string studentname);
+        public Tuple<int, IEnumerable<PaperDTO>> getAllPapersByEmailId(string emailId, int page);
     }
 
     public class TeacherServiceImpl : ITeacherService
@@ -63,7 +65,7 @@ namespace ExamPortal.Services
             MCQPaper mcqPaper = Mapper.Map<MCQPaperDTO, MCQPaper>(paper);
             mcqPaper.PaperCode = code;
             foreach (var que in paper.Questions)
-                mcqPaper.Questions.Add(que.DtoTOEntity());
+                mcqPaper.Questions.Add(Mapper.Map<MCQQuestionDTO, MCQQuestion>(que));
             McqPaperRepo.Create(mcqPaper);
 
             string linktosend = $"https://localhost:44394/Teacher/PaperDetails/{code}";
@@ -80,7 +82,7 @@ namespace ExamPortal.Services
             foreach (var que in paper.Questions)
             {
                 que.MCQOptions.Shuffle();
-                paperdto.Questions.Add(que.EntityToDto());
+                paperdto.Questions.Add(Mapper.Map<MCQQuestion, MCQQuestionDTO>(que));
             }
             return paperdto;
         }
@@ -160,6 +162,12 @@ namespace ExamPortal.Services
         public void SetMarksInDescriptivePaper(string papercode, int marksgiven, string studentname)
         {
             DescriptiveAnswerSheetRepo.SetMarksInDescriptivePaper(papercode, marksgiven, studentname);
+        }
+        public Tuple<int, IEnumerable<PaperDTO>> getAllPapersByEmailId(string emailId, int page)
+        {
+            var x = McqPaperRepo.getAllPapersByEmailId(emailId, page);
+            var paper = Mapper.Map<IEnumerable<Paper>, List<PaperDTO>>(x.Item2);
+            return new Tuple<int, IEnumerable<PaperDTO>>(x.Item1, paper);
         }
     }
 }

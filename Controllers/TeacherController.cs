@@ -14,10 +14,12 @@ namespace ExamPortal.Controllers
 
         public ITeacherService TeacherService { get; }
         #endregion
+        public IActionResult Index()
+        {
+            var data = TeacherService.getMCQPapersByEmailId(User.Identity.Name);
+            return View(data);
+        }
 
-
-
-        public IActionResult Index() => View();
         [HttpGet]
         public IActionResult MakePaper() => View();
         [HttpPost]
@@ -28,7 +30,7 @@ namespace ExamPortal.Controllers
                 paper.TeacherEmailId = User.Identity.Name;
                 //return Json(paper);
                 TeacherService.CreateMCQPaper(paper);
-                return RedirectToAction(nameof(MyPapers), "teacher");
+                return RedirectToAction(nameof(Index), "teacher");
             }
             return View(paper);
         }
@@ -51,14 +53,9 @@ namespace ExamPortal.Controllers
         public async Task<IActionResult> DeletePaper(string paperCode)
         {
             await TeacherService.deletePaper(paperCode);
-            return RedirectToAction(nameof(MyPapers));
+            return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult MyPapers()
-        {
-            var data = TeacherService.getMCQPapersByEmailId(User.Identity.Name);
-            return View(data);
-        }
         [HttpGet]
         public IActionResult PaperDetails(string papercode)
         {

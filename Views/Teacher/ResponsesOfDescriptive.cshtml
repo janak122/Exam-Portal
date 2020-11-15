@@ -2,9 +2,12 @@
 @{
     ViewData["Title"] = "ResponsesOfDescriptive";
 }
+@await Component.InvokeAsync("CurrPath", new
+{
+    header = Model.paper.PaperTitle,
+    paths = new List<EPath>() { EPath.DashBoard, EPath.PaperList, EPath.DescriptivePaperResponses }
+})
 
-<h3>Responses</h3>
-<br />
 <form asp-action="@nameof(TeacherController.GetEnterMarks)" style="display:none" id="myForm">
     <input type="hidden" name="Paper" value="@JsonConvert.SerializeObject(Model.paper)" />
 </form>
