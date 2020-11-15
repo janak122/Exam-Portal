@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ExamPortal.Utilities;
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace ExamPortal.DTOS
 {
@@ -8,7 +10,7 @@ namespace ExamPortal.DTOS
     {
         public PaperDTO()
         {
-            CreatedDate = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
+            CreatedDate = DateTime.Now.ToString(AutoMapperConfig.DateFormat, CultureInfo.InvariantCulture);
         }
         public string PaperCode { get; set; }
         public string TeacherEmailId { get; set; }
@@ -33,7 +35,7 @@ namespace ExamPortal.DTOS
 
         public override bool IsValid(object value)
         {
-            var date = Convert.ToDateTime(value);
+            var date = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
 
             return DateTime.Today <= date && date <= DateTime.Today.AddDays(Maxday);
         }

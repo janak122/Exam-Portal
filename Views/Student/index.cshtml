@@ -69,7 +69,7 @@
         }
     </ul>
 }
-<form asp-action="GetResults" id="paginationform" method="get">
+<form asp-action="@nameof(StudentController.Index)" asp-controller="student" id="paginationform" method="get">
     <input type="hidden" name="pages" id="paginationhidden" />
 </form>
 @section Scripts{

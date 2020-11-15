@@ -28,7 +28,6 @@ namespace ExamPortal.Controllers
             if (ModelState.IsValid)
             {
                 paper.TeacherEmailId = User.Identity.Name;
-                //return Json(paper);
                 TeacherService.CreateMCQPaper(paper);
                 return RedirectToAction(nameof(Index), "teacher");
             }
