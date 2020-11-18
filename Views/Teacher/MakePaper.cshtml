@@ -1,12 +1,13 @@
 ﻿@model MCQPaperDTO
-@{
-    ViewData["Title"] = "MakePaper";
-}
+@{ ViewData["Title"] = "MakePaper"; }
 @section Styles{
     @{ await Html.RenderPartialAsync("_PartialDateTimeCss");}
+    <style>
+        .Question {
+            position: relative;
+        }
+    </style>
 }
-
-
 @await Component.InvokeAsync("CurrPath", new
 {
     header = "Make Paper",
@@ -50,7 +51,7 @@
     </button>
 
 
-    <div class="my-5 questionContainer">
+    <div class="my-5 questionContainer" id="SortableContainer">
         <!--Question goes here-->
     </div>
     <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i>&nbsp; Submit</button>
@@ -58,8 +59,6 @@
 <div class="my-3">
     <a asp-action="@nameof(TeacherController.Index)">Back To List</a>
 </div>
-
-<!-- #region Scripts-->
 @section Scripts{
     @{ await Html.RenderPartialAsync("_PartialDateTimeJs");}
 
@@ -214,23 +213,18 @@
                     i++;
                 });
             });
-            function getExtension(filename) {
-                var parts = filename.split('.');
-                return parts[parts.length - 1];
-            }
+
             $("#csvfile").change(function (event) {
-                var file = event.target.files[0];
-                if (getExtension($(this).val()) != "csv") {
-                    console.log("Not a csv file");
+                var fname = $(this).val();
+                if (fname.substr(fname.lastIndexOf('.') + 1) != "csv")
                     return;
-                }
-                $("#fileUploadLbl").html($(this).val().split("\\").pop());
+                var file = event.target.files[0];
                 let fr = new FileReader();
                 fr.readAsText(file);
                 fr.onload = function (evnt) {
                     var data = evnt.target.result;
                     data = data.split('\n');
-                    console.log(data[0]);
+                    console.log(data[0])
                     for (var i = 0; i < data.length; i++) {
                         data[i] = data[i].split(',');
                         console.log(data[i][0]);
@@ -279,8 +273,10 @@
                     }
                 };
             });
-
+            $("#csvfile").change(function () {
+                $("#fileUploadLbl").html($(this).val().split("\\").pop());
+            });
         });
     </script>
 }
-<!-- #endregion -->
+

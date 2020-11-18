@@ -69,12 +69,11 @@ namespace ExamPortal.Repositories
             AppDbContext.Add(answerSheet);
             AppDbContext.SaveChanges();
         }
-
         public (int total, IEnumerable<AnswerSheet> answersheet) GetAllAnswerSheets(string StudentEmailId, int page)
         {
             int rows = 5;
-            var ans = AppDbContext.AnswerSheets.Where(sheet => sheet.StudentEmailId == StudentEmailId).Skip((page - 1) * rows).Take(rows);
-            var total = AppDbContext.AnswerSheets.Where(sheet => sheet.StudentEmailId == StudentEmailId).Count();
+            var ans = AppDbContext.AnswerSheets.Where(sheet => sheet.StudentEmailId.Equals(StudentEmailId)).Skip((page - 1) * rows).Take(rows);
+            var total = AppDbContext.AnswerSheets.Where(sheet => sheet.StudentEmailId.Equals(StudentEmailId)).Count();
             double pageCount = (double)((decimal)total / Convert.ToDecimal(rows));
             return ((int)Math.Ceiling(pageCount), ans);
         }

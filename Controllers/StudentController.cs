@@ -1,4 +1,5 @@
-﻿using ExamPortal.DTOS;
+﻿
+using ExamPortal.DTOS;
 using ExamPortal.Services;
 using ExamPortal.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,7 @@ namespace ExamPortal.Controllers
             ViewBag.total = x.total;
             return View(x.answersheet);
         }
+
         [HttpGet]
         public IActionResult PaperCode()
         {
@@ -53,12 +55,12 @@ namespace ExamPortal.Controllers
             if (CodeGenerator.GetPaperType(papercode) == EPaperType.MCQ)
             {
                 if (ansSheet != null)
-                    AlreadySubmitted((ansSheet as MCQAnswerSheetDTO).Paper.TeacherEmailId);
+                    return AlreadySubmitted((ansSheet as MCQAnswerSheetDTO).Paper.TeacherEmailId);
                 var paperdto = StudentService.GetMcqPaper(papercode);
                 if (paperdto.paper == null)
                     return InvalidCode();
 
-                return View("Verify", paperdto);
+                return View("Verify", paperdto.paper);
             }
             else if (CodeGenerator.GetPaperType(papercode) == EPaperType.Descriptive)
             {
@@ -76,8 +78,14 @@ namespace ExamPortal.Controllers
         public IActionResult SubmitMCQPaper(string papercode)
         {
             var paperdto = StudentService.GetMcqPaper(papercode);
-            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            return View(paperdto);
+            //Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            if (paperdto.paper == null)
+            {
+                ViewBag.Data = "Invalid Code";
+                return View("PaperCode");
+            }
+            ViewBag.answers = paperdto.answers;
+            return View(paperdto.paper);
         }
         [HttpPost]
         public IActionResult SubmitMCQPaper(MCQPaperDTO paper)
@@ -113,7 +121,13 @@ namespace ExamPortal.Controllers
         public IActionResult SubmitDescriptivePaper(string papercode)
         {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            return View(StudentService.GetDescriptiveAnswerSheetForExam(papercode));
+            var paper = StudentService.GetDescriptiveAnswerSheetForExam(papercode);
+            if (paper == null)
+            {
+                ViewBag.Data = "Invalid Code";
+                return View("PaperCode");
+            }
+            return View(paper);
         }
         [HttpPost]
         public async Task<IActionResult> SubmitDescriptivePaper(DescriptiveAnswerSheetDTO answerSheet1)

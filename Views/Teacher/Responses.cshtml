@@ -8,8 +8,11 @@
     header = Model.Paper.PaperTitle,
     paths = new List<EPath>() { EPath.DashBoard, EPath.PaperList, EPath.MCQPaperResponses }
 })
+
 @if (Model.answersheet != null && Model.answersheet.Count > 0)
 {
+    
+
     <h5>Paper Title : <small>@Model.Paper.PaperTitle</small></h5>
     <h5>Paper Code  : <small>@Model.Paper.PaperCode</small></h5>
 

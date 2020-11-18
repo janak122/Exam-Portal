@@ -65,10 +65,13 @@ namespace ExamPortal.Services
             MCQPaper mcqPaper = Mapper.Map<MCQPaperDTO, MCQPaper>(paper);
             mcqPaper.PaperCode = code;
             foreach (var que in paper.Questions)
+            {
                 mcqPaper.Questions.Add(Mapper.Map<MCQQuestionDTO, MCQQuestion>(que));
+                mcqPaper.TotalMarks += que.Marks;
+            }
             McqPaperRepo.Create(mcqPaper);
 
-            string linktosend = $"https://localhost:44394/Teacher/PaperDetails/{code}";
+            string linktosend = $"https://localhost:44394/Teacher/PaperDetails?papercode={code}";
             EmailService.SendMailForPaper(code, linktosend, paper.PaperTitle, paper.CreatedDate.ToString(), paper.DeadLine.ToString(), paper.TeacherEmailId);
             //sends mail regarding paper update
 
@@ -87,7 +90,7 @@ namespace ExamPortal.Services
             return paperdto;
         }
 
-        public IEnumerable<PaperDTO> getMCQPapersByEmailId(string emailId)
+        public IEnumerable<PaperDTO> getMCQPapersByEmailId(string emailId)  //Depericated 
         {
             var ans = Mapper.Map<IEnumerable<MCQPaper>, List<PaperDTO>>(McqPaperRepo.GetByTeacherEmail(emailId));
             var ansfinal = ans.Concat(Mapper.Map<IEnumerable<DescriptivePaper>, List<PaperDTO>>(DescriptivePaperRepo.GetByTeacherEmail(emailId)));
@@ -132,15 +135,13 @@ namespace ExamPortal.Services
         }
         public (MCQPaperDTO, List<MCQAnswerSheetDTO>) GetAnswerSheetsBycode(string papercode)
         {
-            var answerSheet = AnswerSheetRepo.GetByPaperCode(papercode);
             var paper = McqPaperRepo.GetByPaperCode(papercode);
             var paperdto = Mapper.Map<MCQPaper, MCQPaperDTO>(paper);
+            var answerSheet = AnswerSheetRepo.GetByPaperCode(papercode).ToList();
+            if (answerSheet.Count == 0)
+                return (paperdto,null);
+            
             var ans = Mapper.Map<IEnumerable<MCQAnswerSheet>, List<MCQAnswerSheetDTO>>(answerSheet);
-
-            foreach (var que in paperdto.Questions)
-            {
-                paperdto.TotalMarks += que.Marks;
-            }
             return (paperdto, ans);
         }
         public (DescriptivePaperDTO, List<DescriptiveAnswerSheetDTO>) GetDescriptiveAnswerSheetsBycode(string papercode)
@@ -148,7 +149,10 @@ namespace ExamPortal.Services
 
             var answersheets = DescriptiveAnswerSheetRepo.GetAllResponseByCode(papercode).ToList();
             var paper = DescriptivePaperRepo.GetByPaperCode(papercode);
-
+            if (answersheets.Count == 0)
+            {
+                return (Mapper.Map<DescriptivePaper, DescriptivePaperDTO>(paper), null);
+            }
             var ans = (
                paper: Mapper.Map<DescriptivePaper, DescriptivePaperDTO>(paper),
                answersheets: Mapper.Map<IEnumerable<DescriptiveAnswerSheet>, List<DescriptiveAnswerSheetDTO>>(answersheets)

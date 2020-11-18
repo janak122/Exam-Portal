@@ -21,6 +21,7 @@ namespace ExamPortal.DTOS
         [Required]
         public string PaperTitle { get; set; }
         public int TotalMarks { get; set; }
+
         public EPaperType Type { get; set; }
     }
 
@@ -35,9 +36,12 @@ namespace ExamPortal.DTOS
 
         public override bool IsValid(object value)
         {
-            var date = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
-
-            return DateTime.Today <= date && date <= DateTime.Today.AddDays(Maxday);
+            DateTime date;
+            if (DateTime.TryParseExact(value as string, AutoMapperConfig.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+            {
+                return DateTime.Today <= date && date <= DateTime.Today.AddDays(Maxday);
+            }
+            return false;
         }
     }
 }

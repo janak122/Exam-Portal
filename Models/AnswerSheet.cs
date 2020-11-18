@@ -1,4 +1,5 @@
 ﻿
+
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,7 +11,7 @@ namespace ExamPortal.Models
         public int AnswerSheetId { get; set; }
         public string StudentEmailId { get; set; }
         public DateTime SubmittedTime { get; set; }
-        public int? MarksObtained { get; set; }
+        public int? MarksObtained { get; set; } = -1;
 
     }
 }

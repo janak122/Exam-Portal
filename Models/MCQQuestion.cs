@@ -13,23 +13,15 @@ namespace ExamPortal.Models
             MCQPaper = new MCQPaper();
             TrueAnswer = new MCQOption();
         }
-
-        #region My Paper
         [Required]
         public int MCQPaperId { get; set; }
         public MCQPaper MCQPaper { get; set; }
-        #endregion
 
-
-        #region True Answer
         public int? MCQOptionId { get; set; }
-        [ForeignKey(nameof(MCQOptionId))]
+        [ForeignKey("MCQOptionId")]
         public MCQOption TrueAnswer { get; set; }
-        #endregion
-
 
         public List<MCQOption> MCQOptions { get; set; }
-
     }
 
 }

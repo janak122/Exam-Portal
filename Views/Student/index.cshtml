@@ -1,13 +1,15 @@
-﻿@model IEnumerable<ExamPortal.DTOS.AnswerSheetDTO>
+﻿
+@model IEnumerable<ExamPortal.DTOS.AnswerSheetDTO>
 
 @{
     ViewData["Title"] = "GetResults";
 }
 @await Component.InvokeAsync("CurrPath", new
 {
-    header = "Answers ...",
+    header = "Answers",
     paths = new List<EPath>() { EPath.DashBoard, EPath.AnswerSheetList }
 })
+
 <p>
     <a asp-action="PaperCode" class="btn btn-primary"> <span><i class="fas fa-plus"></i></span>&nbsp; Submit New Answer</a>
 </p>
@@ -27,30 +29,35 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null && Model.Count() > 0)
         {
-            <tr>
-                <td>
-                    @item.SubmittedTime
-                </td>
-                <td>
-                    @item.paperdto.PaperCode / @item.paperdto.PaperTitle
-                </td>
-                @if (item.MarksObtained == -1)
-                {
+            @foreach (var item in Model)
+            {
+                <tr>
                     <td>
-                        <span class="text-danger"><b>Pending</b></span>
+                        @item.SubmittedTime
                     </td>
-                }
-                else
-                {
                     <td>
-                        @item.MarksObtained / @item.paperdto.TotalMarks
+                        @item.paperdto.PaperCode / @item.paperdto.PaperTitle
                     </td>
-                }
+                    @if (item.MarksObtained == -1)
+                    {
+                        <td>
+                            <span class="text-danger"><b>Pending</b></span>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @item.MarksObtained / @item.paperdto.TotalMarks
+                        </td>
 
-            </tr>
+                    }
+
+                </tr>
+            }
         }
+
     </tbody>
 </table>
 @if (ViewBag.total > 1)
@@ -61,6 +68,7 @@
             @if (i == ViewBag.currentpage)
             {
                 <li class="page-item active" style="cursor:pointer"><a class="page-link">@i</a></li>
+
             }
             else
             {
@@ -69,7 +77,7 @@
         }
     </ul>
 }
-<form asp-action="@nameof(StudentController.Index)" asp-controller="student" id="paginationform" method="get">
+<form asp-action="Index" asp-controller="Student" id="paginationform" method="get">
     <input type="hidden" name="pages" id="paginationhidden" />
 </form>
 @section Scripts{

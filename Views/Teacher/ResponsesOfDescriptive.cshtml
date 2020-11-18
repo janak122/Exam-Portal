@@ -7,7 +7,6 @@
     header = Model.paper.PaperTitle,
     paths = new List<EPath>() { EPath.DashBoard, EPath.PaperList, EPath.DescriptivePaperResponses }
 })
-
 <form asp-action="@nameof(TeacherController.GetEnterMarks)" style="display:none" id="myForm">
     <input type="hidden" name="Paper" value="@JsonConvert.SerializeObject(Model.paper)" />
 </form>
@@ -36,7 +35,7 @@
             {
                 <tr>
                     <td>@Model.answersheet[i].StudentEmailId</td>
-                    @if (Model.answersheet[i].MarksObtained == null)
+                    @if (Model.answersheet[i].MarksObtained == -1)
                     {
                         <td class="text text-danger"><b>Pending</b></td>
                     }
@@ -62,5 +61,5 @@ else
 
 
 <div class="my-3">
-    <a asp-action="MyPapers">Go To List</a>
+    <a asp-action="@nameof(TeacherController.Index)">Go To List</a>
 </div>

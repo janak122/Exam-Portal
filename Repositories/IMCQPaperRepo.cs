@@ -19,14 +19,12 @@ namespace ExamPortal.Repositories
 
     public class MCQPaperRepoImpl : IMCQPaperRepo
     {
-        #region Constructor And Propertied
         public MCQPaperRepoImpl(AppDbContext appDbContext)
         {
             AppDbContext = appDbContext;
         }
 
         private AppDbContext AppDbContext { get; }
-        #endregion
 
         public async Task<MCQPaper> Create(MCQPaper paper)
         {
@@ -71,7 +69,7 @@ namespace ExamPortal.Repositories
                 try
                 {
                     ans = AppDbContext.MCQPapers
-                        .FirstOrDefault(paper => paper.PaperCode == paperCode);
+                        .FirstOrDefault(paper => paper.PaperCode.Equals(paperCode));
                     if (ans == null)
                     {
                         transaction.Commit();

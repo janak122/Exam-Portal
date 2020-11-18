@@ -7,6 +7,7 @@ namespace ExamPortal.DTOS
     {
         public string AnswerLink { get; set; }
         [Required(ErrorMessage = "please upload answersheet")]
+
         public IFormFile AnswerSheet { get; set; }
         public DescriptivePaperDTO Paper { get; set; }
     }

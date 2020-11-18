@@ -14,12 +14,16 @@ namespace ExamPortal.Controllers
 
         public ITeacherService TeacherService { get; }
         #endregion
-        public IActionResult Index()
-        {
-            var data = TeacherService.getMCQPapersByEmailId(User.Identity.Name);
-            return View(data);
-        }
 
+
+
+        public IActionResult Index(int? pages)
+        {
+            var data = TeacherService.getAllPapersByEmailId(User.Identity.Name, pages ?? 1);
+            ViewBag.currentpage = pages ?? 1;
+            ViewBag.total = data.Item1;
+            return View(data.Item2);
+        }
         [HttpGet]
         public IActionResult MakePaper() => View();
         [HttpPost]
@@ -27,6 +31,8 @@ namespace ExamPortal.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
                 paper.TeacherEmailId = User.Identity.Name;
                 TeacherService.CreateMCQPaper(paper);
                 return RedirectToAction(nameof(Index), "teacher");
@@ -54,7 +60,7 @@ namespace ExamPortal.Controllers
             await TeacherService.deletePaper(paperCode);
             return RedirectToAction(nameof(Index));
         }
-        [HttpGet]
+
         [HttpGet]
         public IActionResult PaperDetails(string papercode)
         {
