@@ -1,15 +1,78 @@
-﻿@model (List<string> Title,List<double> Marks)
+﻿@model (List<string> Title, List<double> Marks)
 
 @{
     Random r = new Random();
 }
-
-<div class="container" style="width:75%;height:75%">
-    <canvas id="studentanalysis"></canvas>
+<div class="col-xl-6">
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-area mr-1"></i>
+            Progress as a Student
+        </div>
+        <div class="card-body"><canvas id="studentanalysis" width="100" height="40"></canvas></div>
+    </div>
 </div>
 
 <script>
     $(document).ready(function () {
+
+        Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#292b2c';
+
+        // Area Chart Example
+        let ctx = document.getElementById('studentanalysis').getContext('2d');
+        var myLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [
+                    @foreach(var i in Model.Title)
+                    {
+                        <text>'@i',</text>
+                    }
+                ],
+                datasets: [{
+                    label: "Progress",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(2,117,216,0.2)",
+                    borderColor: "rgba(2,117,216,1)",
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(2,117,216,1)",
+                    pointBorderColor: "rgba(255,255,255,0.8)",
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                    pointHitRadius: 50,
+                    pointBorderWidth: 2,
+                    data: [
+                        @foreach(var i in Model.Marks)
+                        {
+                            <text>@i,</text>
+                        }
+                    ],
+                }],
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: "rgba(0, 0, 0, .125)",
+                        }
+                    }],
+                },
+                legend: {
+                    display: false
+                }
+            }
+        });
+
+        @*///////////
         let ctx = document.getElementById('studentanalysis').getContext('2d');
         var chart = new Chart(ctx, {
             // The type of chart we want to create
@@ -46,20 +109,15 @@
 
             // Configuration options go here
             options: {
-                title: {
-                    display: true,
-                    text: "Progress as a Student",
-                    fontSize: 25
-                },
                 legend: {
-                    position: 'right'
+                    display: false
                 }
             }
-        });
+        });*@
     });
-    function setop(color, opacity) {
-        var alpha = opacity === undefined ? 0.5 : 1 - opacity;
-        return Color(color).alpha(alpha).rgbString();
-    }
+    //function setop(color, opacity) {
+    //    var alpha = opacity === undefined ? 0.5 : 1 - opacity;
+    //    return Color(color).alpha(alpha).rgbString();
+    //}
 </script>
 

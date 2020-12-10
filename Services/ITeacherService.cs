@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using ExamPortal.Controllers;
 using ExamPortal.DTOS;
 using ExamPortal.Models;
 using ExamPortal.Repositories;
 using ExamPortal.Utilities;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +18,7 @@ namespace ExamPortal.Services
         /// <summary>
         /// save paper to database and returns sharable code
         /// </summary>
-        public string CreateMCQPaper(MCQPaperDTO paper);
+        public string CreateMCQPaper(MCQPaperDTO paper, IUrlHelper urlHelper);
         /// <summary>
         /// return paper associated with given code.
         /// </summary>
@@ -59,8 +61,9 @@ namespace ExamPortal.Services
         public IEmailService EmailService { get; }
         public IDescriptiveAnswerSheetRepo DescriptiveAnswerSheetRepo { get; }
         #endregion
-        public string CreateMCQPaper(MCQPaperDTO paper)
+        public string CreateMCQPaper(MCQPaperDTO paper, IUrlHelper urlHelper)
         {
+
             string code = CodeGenerator.GetSharableCode(EPaperType.MCQ);
             MCQPaper mcqPaper = Mapper.Map<MCQPaperDTO, MCQPaper>(paper);
             mcqPaper.PaperCode = code;
@@ -70,8 +73,12 @@ namespace ExamPortal.Services
                 mcqPaper.TotalMarks += que.Marks;
             }
             McqPaperRepo.Create(mcqPaper);
+            string linktosend = urlHelper.Action(
+                nameof(TeacherController.PaperDetails),
+                nameof(TeacherController),
+                new { papercode = $"{code}" },
+                urlHelper.ActionContext.HttpContext.Request.Scheme);
 
-            string linktosend = $"https://localhost:44394/Teacher/PaperDetails?papercode={code}";
             EmailService.SendMailForPaper(code, linktosend, paper.PaperTitle, paper.CreatedDate.ToString(), paper.DeadLine.ToString(), paper.TeacherEmailId);
             //sends mail regarding paper update
 
@@ -139,8 +146,8 @@ namespace ExamPortal.Services
             var paperdto = Mapper.Map<MCQPaper, MCQPaperDTO>(paper);
             var answerSheet = AnswerSheetRepo.GetByPaperCode(papercode).ToList();
             if (answerSheet.Count == 0)
-                return (paperdto,null);
-            
+                return (paperdto, null);
+
             var ans = Mapper.Map<IEnumerable<MCQAnswerSheet>, List<MCQAnswerSheetDTO>>(answerSheet);
             return (paperdto, ans);
         }

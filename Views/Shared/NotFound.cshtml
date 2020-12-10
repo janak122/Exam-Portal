@@ -3,6 +3,24 @@
     ViewData["Title"] = "NotFound";
 }
 
-<h1>@ViewBag.ErrorMsg</h1>
+<div id="layoutError" class="mt-5">
+    <div id="layoutError_content">
+        <main>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="text-center mt-4">
+                            <img class="mb-4 img-error" src="~/template/asset/images/error-404-monochrome.svg" />
+                            <p class="lead">This requested URL was not found on this server.</p>
+                            <a asp-action="index" asp-controller="home">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Return to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
 
-<a asp-action="index" asp-controller="home">click here to navigate to home page</a>

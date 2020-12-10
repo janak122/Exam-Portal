@@ -21,7 +21,8 @@ namespace ExamPortal.Services
                 using (SmtpClient MailClient = new SmtpClient("smtp.gmail.com", 587))
                 {
                     MailClient.EnableSsl = true;
-                    MailClient.Credentials = new System.Net.NetworkCredential("examportalcoremvc@gmail.com", "examportal@123");
+                    MailClient.UseDefaultCredentials = false;
+                    MailClient.Credentials = new System.Net.NetworkCredential("examportalcoremvc@gmail.com", "examportal@819");
                     MailClient.Send(emailMessage);
                 }
             }
